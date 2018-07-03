@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">FirebaseAuthenticationTest</string>
+    <string name="user_not_logged">User not logged</string>
+    <string name="user_logged">User logged!!! Display name:</string>
 </resources>
