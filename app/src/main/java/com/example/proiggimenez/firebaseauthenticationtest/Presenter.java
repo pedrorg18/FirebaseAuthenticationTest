@@ -20,16 +20,15 @@ public class Presenter {
     private FirebaseAuth mAuth;
     private MainView view;
     private Activity activity;
-    FirebaseUser currentUser;
 
-    public Presenter(MainView view, Activity activity) {
+    Presenter(MainView view, Activity activity) {
         this.view = view;
         this.activity = activity;
         mAuth = FirebaseAuth.getInstance();
     }
 
     public void loadCurrentUser() {
-        currentUser = mAuth.getCurrentUser();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
         view.updateUI(currentUser);
     }
 
@@ -56,35 +55,38 @@ public class Presenter {
     void changeUserName(String userName) {
         Log.d(TAG, "changeUserName");
         final FirebaseUser currentUser = mAuth.getCurrentUser();
-//        currentUser.updateEmail(userName);
 
-        UserProfileChangeRequest userProfileChangeRequest
-                = new UserProfileChangeRequest.Builder().setDisplayName(userName).build();
-        Task<Void> voidTask = currentUser.updateProfile(userProfileChangeRequest);
-        voidTask.addOnCompleteListener(activity, new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                view.log("Firebase Name change Completed");
-            }
-        });
+        if(currentUser == null) {
+            view.notifyMessage("Error: no authenticated user");
+        } else {
+            UserProfileChangeRequest userProfileChangeRequest
+                    = new UserProfileChangeRequest.Builder().setDisplayName(userName).build();
+            Task<Void> voidTask = currentUser.updateProfile(userProfileChangeRequest);
+            voidTask.addOnCompleteListener(activity, new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    view.log("Firebase Name change Completed");
+                }
+            });
 
-        voidTask.addOnSuccessListener(activity, new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                view.notifyMessage("Firebase Name changed successfully");
-                view.log("Firebase Name changed successfully");
-                view.updateUI(currentUser);
-            }
-        });
+            voidTask.addOnSuccessListener(activity, new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    view.notifyMessage("Firebase Name changed successfully");
+                    view.log("Firebase Name changed successfully");
+                    view.updateUI(currentUser);
+                }
+            });
 
-        voidTask.addOnFailureListener(activity, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                view.notifyMessage("Firebase Name changed successfully");
-                view.log("Firebase Name changed successfully");
-                e.printStackTrace();
-            }
-        });
+            voidTask.addOnFailureListener(activity, new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    view.notifyMessage("Firebase Name changed successfully");
+                    view.log("Firebase Name changed successfully");
+                    e.printStackTrace();
+                }
+            });
+        }
     }
 
     public void signOutUser() {
