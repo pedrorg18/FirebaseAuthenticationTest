@@ -87,4 +87,8 @@ public class Presenter {
         });
     }
 
+    public void signOutUser() {
+        mAuth.signOut();
+        view.updateUI(null);
+    }
 }

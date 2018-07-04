@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,6 +18,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
 
     private TextView textMessage;
     private Button multiPurposeButton;
+    private ImageButton buttonSignOff;
     private EditText editTextName;
 
     private Mode currentMode;
@@ -31,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
 
         textMessage = findViewById(R.id.textMessage);
         multiPurposeButton = findViewById(R.id.buttonSignIn);
+        buttonSignOff = findViewById(R.id.buttonSignOff);
         editTextName = findViewById(R.id.editTextName);
 
         multiPurposeButton.setOnClickListener(new View.OnClickListener() {
@@ -40,6 +43,13 @@ public class MainActivity extends AppCompatActivity implements MainView {
                     presenter.signInUser();
                 else
                     presenter.changeUserName(editTextName.getText().toString());
+            }
+        });
+
+        buttonSignOff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                presenter.signOutUser();
             }
         });
 
@@ -60,11 +70,13 @@ public class MainActivity extends AppCompatActivity implements MainView {
             editTextName.setVisibility(View.INVISIBLE);
             multiPurposeButton.setText(R.string.sign_in);
             currentMode = Mode.SIGN_IN;
+            buttonSignOff.setVisibility(View.INVISIBLE);
         } else {
             textMessage.setText(String.format("%s %s", getString(R.string.user_logged), currentUser.getDisplayName()));
             editTextName.setVisibility(View.VISIBLE);
             multiPurposeButton.setText(R.string.set_name);
             currentMode = Mode.CHANGE_NAME;
+            buttonSignOff.setVisibility(View.VISIBLE);
         }
     }
 
