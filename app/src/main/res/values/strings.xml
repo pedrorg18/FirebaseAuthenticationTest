@@ -2,4 +2,6 @@
     <string name="app_name">FirebaseAuthenticationTest</string>
     <string name="user_not_logged">User not logged</string>
     <string name="user_logged">User logged!!! Display name:</string>
+    <string name="set_name">Set name</string>
+    <string name="sign_in">Sign In!</string>
 </resources>

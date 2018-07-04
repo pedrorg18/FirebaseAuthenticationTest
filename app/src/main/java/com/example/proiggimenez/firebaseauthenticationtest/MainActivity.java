@@ -1,27 +1,27 @@
 package com.example.proiggimenez.firebaseauthenticationtest;
 
-import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MainView {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
-    private FirebaseAuth mAuth;
+    private static final String TAG = "FirebaseAuthTest";
 
     private TextView textMessage;
-    private Button signInButton;
+    private Button multiPurposeButton;
+    private EditText editTextName;
+
+    private Mode currentMode;
+
+    private Presenter presenter;
 
 
     @Override
@@ -30,53 +30,63 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         textMessage = findViewById(R.id.textMessage);
-        signInButton = findViewById(R.id.buttonSignIn);
+        multiPurposeButton = findViewById(R.id.buttonSignIn);
+        editTextName = findViewById(R.id.editTextName);
 
-        signInButton.setOnClickListener(new View.OnClickListener() {
+        multiPurposeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                signInUser();
+                if(currentMode.equals(Mode.SIGN_IN))
+                    presenter.signInUser();
+                else
+                    presenter.changeUserName(editTextName.getText().toString());
             }
         });
 
-        mAuth = FirebaseAuth.getInstance();
+        presenter = new Presenter(this, this);
     }
 
     @Override
     public void onStart() {
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        updateUI(currentUser);
+        presenter.loadCurrentUser();
     }
 
-    private void updateUI(FirebaseUser currentUser) {
+    @Override
+    public void updateUI(FirebaseUser currentUser) {
         if(currentUser == null) {
             textMessage.setText(R.string.user_not_logged);
+            editTextName.setVisibility(View.INVISIBLE);
+            multiPurposeButton.setText(R.string.sign_in);
+            currentMode = Mode.SIGN_IN;
         } else {
-            textMessage.setText(getString(R.string.user_logged) + currentUser.getDisplayName());
+            textMessage.setText(String.format("%s %s", getString(R.string.user_logged), currentUser.getDisplayName()));
+            editTextName.setVisibility(View.VISIBLE);
+            multiPurposeButton.setText(R.string.set_name);
+            currentMode = Mode.CHANGE_NAME;
         }
     }
 
-    private void signInUser() {
-        mAuth.signInAnonymously()
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInAnonymously:success");
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            updateUI(user);
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "signInAnonymously:failure", task.getException());
-                            Toast.makeText(MainActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                            updateUI(null);
-                        }
-                    }
-                });
+    @Override
+    public void notifyMessage(String message) {
+        Toast.makeText(MainActivity.this, message,
+                Toast.LENGTH_SHORT).show();
+    }
 
+    @Override
+    public void log(String message) {
+        Log.d(TAG, message);
+    }
+
+    @Override
+    public void logWarn(String message, Exception e) {
+        Log.w(TAG, message, e);
+    }
+
+
+    private enum Mode {
+        SIGN_IN,
+        CHANGE_NAME
     }
 }
