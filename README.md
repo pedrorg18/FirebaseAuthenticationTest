@@ -1,5 +1,5 @@
 # FirebaseAuthenticationTest
-App that signs in a user anonymously
+App that signs a user in anonymously
 
 First we import firebase into the project. CAUTION: the google json file is misssing and therefore the project won't work. You must create a firebase project and generate that file. Place it under the 'app' directory.
 
